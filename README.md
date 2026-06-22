@@ -11,7 +11,7 @@ It finds your cloud folders for you (Dropbox, OneDrive, Google Drive, Box, Mega,
 Proton Drive, iCloud, plus mapped and network drives), and you can add any other
 folder by hand, including UNC shares and WebDAV.
 
-*Built and vibed with Victor S. (DatJavaClass) and his trusty AI assistant whos isn't afraid of Ghosts.
+*Built and vibed with Victor S. (DatJavaClass) and his trusty AI assistant whos isn't afraid of Ghosts.*
 
 ## Download
 
