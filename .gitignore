@@ -1,0 +1,27 @@
+# Build output
+bin/
+obj/
+publish/
+
+# Personal configuration - never commit real paths / account names.
+# Ship destinations.example.json instead.
+destinations.json
+
+# Signing credentials / config - local only, never commit
+signing.json
+
+# Generated icon (produced at build time)
+CloudRouter.ico
+
+# Local notes / assistant config - keep out of the public repo
+CLAUDE.md
+**/CLAUDE.md
+.claude/
+
+# IDE / misc
+.vs/
+*.user
+
+# Transient build / XAML compiler temp files
+*.tmp
+*.tmp.*

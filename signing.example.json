@@ -1,0 +1,15 @@
+{
+  "_comment": "Copy this to signing.json (git-ignored) and fill it in to enable Authenticode signing during build. Choose ONE method via the top-level fields. The _*_example blocks below are just reference and are ignored.",
+
+  "method": "trustedsigning",
+  "endpoint": "https://eus.codesigning.azure.net/",
+  "account": "your-trusted-signing-account",
+  "profile": "your-certificate-profile",
+  "dlib": "%USERPROFILE%\\.nuget\\packages\\microsoft.trusted.signing.client\\1.0.60\\bin\\x64\\Azure.CodeSigning.Dlib.dll",
+  "timestampUrl": "http://timestamp.acs.microsoft.com",
+
+  "_auth_note": "Trusted Signing authenticates via your Azure login (az login) or the AZURE_TENANT_ID / AZURE_CLIENT_ID / AZURE_CLIENT_SECRET environment variables.",
+
+  "_pfx_example":   { "method": "pfx", "pfx": "C:\\certs\\mycert.pfx", "password": "secret", "timestampUrl": "http://timestamp.digicert.com" },
+  "_token_example": { "method": "thumbprint", "thumbprint": "0123456789ABCDEF0123456789ABCDEF01234567", "timestampUrl": "http://timestamp.digicert.com" }
+}

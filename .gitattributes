@@ -1,0 +1,6 @@
+# Normalize line endings on commit, check out native.
+* text=auto
+
+# Windows-only scripts stay CRLF.
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
