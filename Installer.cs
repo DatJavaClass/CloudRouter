@@ -31,22 +31,33 @@ public static class Installer
         // them safe, unique slugs and store the same value we register.
         NormalizeKeys(cfg);
 
-        // Deploy the running helper's files (exe + deps + icon), unless we already run from there.
-        string baseDir = AppContext.BaseDirectory.TrimEnd('\\');
-        if (!string.Equals(baseDir, installDir.TrimEnd('\\'), StringComparison.OrdinalIgnoreCase))
+        string exe = Path.Combine(installDir, "CloudRouter.exe");
+        string ico = Path.Combine(installDir, "CloudRouter.ico");
+
+        // Deploy the helper. The single-file release is just the .exe (no loose deps);
+        // a dev build also has a few siblings. Copy ONLY the exe and those known
+        // siblings - never "every file beside me", since the single-file exe may be
+        // run straight from a Downloads folder full of unrelated files.
+        string exeSource = Environment.ProcessPath ?? exe;
+        string srcDir = Path.GetDirectoryName(exeSource) ?? CloudConfig.AppDir;
+        if (!string.Equals(srcDir.TrimEnd('\\'), installDir.TrimEnd('\\'), StringComparison.OrdinalIgnoreCase))
         {
-            foreach (string f in Directory.GetFiles(baseDir))
+            File.Copy(exeSource, exe, overwrite: true);
+            foreach (string name in new[] { "CloudRouter.dll", "CloudRouter.deps.json", "CloudRouter.runtimeconfig.json", "CloudRouter.ico" })
             {
-                string name = Path.GetFileName(f);
-                if (name.Equals("destinations.json", StringComparison.OrdinalIgnoreCase)) continue;
-                File.Copy(f, Path.Combine(installDir, name), overwrite: true);
+                string sib = Path.Combine(srcDir, name);
+                if (File.Exists(sib)) File.Copy(sib, Path.Combine(installDir, name), overwrite: true);
             }
+        }
+
+        // The single-file build ships no loose .ico, so generate it if absent.
+        if (!File.Exists(ico))
+        {
+            try { IconMaker.Write(ico); } catch { /* icon is cosmetic */ }
         }
 
         cfg.Save(Path.Combine(installDir, "destinations.json"));
 
-        string exe = Path.Combine(installDir, "CloudRouter.exe");
-        string ico = Path.Combine(installDir, "CloudRouter.ico");
         WriteRegistry(cfg, exe, ico);
         RefreshShell();
     }

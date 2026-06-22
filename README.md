@@ -11,6 +11,14 @@ folder by hand, including UNC shares and WebDAV.
 
 *Built and vibed with AI by Victor S. (DatJavaClass).*
 
+## Download
+
+**[Download Cloud Router](https://github.com/DatJavaClass/CloudRouter/releases/latest/download/CloudRouterSetup.exe)** &nbsp;|&nbsp; Windows 10 / 11
+
+One file, nothing else to install. Double-click it, tick the folders you want,
+and you're done. (Windows may show a SmartScreen prompt the first time, since the
+app isn't signed yet: choose **More info**, then **Run anyway**.)
+
 ## What you get
 
 - A **Cloud Router** submenu on right-click, each destination shown with its real icon.
@@ -21,10 +29,21 @@ folder by hand, including UNC shares and WebDAV.
   different drives just work.
 - Per-user install. No admin rights. Uninstalls clean.
 
-## Quick start
+## Install
 
-You'll need the [.NET SDK](https://dotnet.microsoft.com/download) (9 or newer) to
-build it. (Prebuilt downloads are on the roadmap.)
+Download `CloudRouterSetup.exe` above and run it. The **setup window** opens and
+lists every cloud folder it found: tick the ones you want, hit **Add folder...**
+for a network or shared folder it missed, choose Move or Copy, and click
+**Install**. That registers the menu under `%LOCALAPPDATA%\CloudRouter` (per-user,
+no admin rights).
+
+Now right-click any file. On Windows 11 the menu lives under **Show more options**
+(or tap `Shift+F10` to jump straight there).
+
+### Build from source
+
+Prefer to build it yourself? You'll need the
+[.NET SDK](https://dotnet.microsoft.com/download) (9 or newer):
 
 ```powershell
 git clone https://github.com/DatJavaClass/CloudRouter.git
@@ -33,12 +52,8 @@ cd CloudRouter
 ./publish/CloudRouter.exe
 ```
 
-That last line opens the **setup window**. It lists every cloud folder it found:
-tick the ones you want, hit **Add folder...** for anything it missed, choose Move
-or Copy, and click **Install**.
-
-Now right-click any file. On Windows 11 the menu lives under **Show more options**
-(or tap `Shift+F10` to jump straight there).
+The exe also takes `--install [config] [dir]` and `--uninstall` for the command
+line, and `./install.ps1` builds and registers from `destinations.json` directly.
 
 ## Adding folders by hand
 

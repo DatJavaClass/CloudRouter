@@ -24,6 +24,13 @@ public sealed class CloudConfig
     public static string InstallDir =>
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CloudRouter");
 
+    /// <summary>
+    /// Folder the running .exe actually lives in. Uses ProcessPath so it is correct
+    /// for single-file builds too (where AppContext.BaseDirectory is a temp extract dir).
+    /// </summary>
+    public static string AppDir =>
+        Path.GetDirectoryName(Environment.ProcessPath) ?? AppContext.BaseDirectory;
+
     private static readonly JsonSerializerOptions ReadOpts = new() { PropertyNameCaseInsensitive = true };
     private static readonly JsonSerializerOptions WriteOpts = new() { WriteIndented = true };
 

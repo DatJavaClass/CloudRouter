@@ -40,7 +40,7 @@ internal static class Program
             {
                 string outPath = args.Length >= 2
                     ? args[1]
-                    : Path.Combine(AppContext.BaseDirectory, "CloudRouter.ico");
+                    : Path.Combine(CloudConfig.AppDir, "CloudRouter.ico");
                 IconMaker.Write(outPath);
                 return 0;
             }
@@ -50,7 +50,7 @@ internal static class Program
             {
                 string outPath = args.Length >= 2
                     ? args[1]
-                    : Path.Combine(AppContext.BaseDirectory, "detected.json");
+                    : Path.Combine(CloudConfig.AppDir, "detected.json");
                 var found = Detection.Detect();
                 File.WriteAllText(outPath,
                     JsonSerializer.Serialize(found, new JsonSerializerOptions { WriteIndented = true }));
@@ -60,7 +60,7 @@ internal static class Program
             // Headless install / uninstall (the setup GUI calls Installer directly).
             if (args[0].Equals("--install", StringComparison.OrdinalIgnoreCase))
             {
-                string cfgPath = args.Length >= 2 ? args[1] : Path.Combine(AppContext.BaseDirectory, "destinations.json");
+                string cfgPath = args.Length >= 2 ? args[1] : Path.Combine(CloudConfig.AppDir, "destinations.json");
                 string? dir = args.Length >= 3 ? args[2] : null;
                 Installer.Install(CloudConfig.Load(cfgPath), dir);
                 return 0;
@@ -85,7 +85,7 @@ internal static class Program
             string source = string.Join(' ', args.Skip(2)).Trim().Trim('"');
             bool copy = action == "copy";
 
-            CloudConfig cfg = CloudConfig.Load(Path.Combine(AppContext.BaseDirectory, "destinations.json"));
+            CloudConfig cfg = CloudConfig.Load(Path.Combine(CloudConfig.AppDir, "destinations.json"));
             Destination? dest = cfg.destinations.FirstOrDefault(
                 d => string.Equals(d.key, key, StringComparison.OrdinalIgnoreCase));
             if (dest is null)
@@ -201,7 +201,7 @@ internal static class Program
         try
         {
             using var ni = new NotifyIcon();
-            string iconPath = Path.Combine(AppContext.BaseDirectory, "CloudRouter.ico");
+            string iconPath = Path.Combine(CloudConfig.AppDir, "CloudRouter.ico");
             ni.Icon = File.Exists(iconPath) ? new Icon(iconPath) : SystemIcons.Information;
             ni.Visible = true;
             ni.BalloonTipTitle = "Cloud Router";

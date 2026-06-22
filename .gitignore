@@ -2,6 +2,8 @@
 bin/
 obj/
 publish/
+publish-release/
+dist/
 
 # Personal configuration - never commit real paths / account names.
 # Ship destinations.example.json instead.
