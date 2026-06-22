@@ -1,3 +1,5 @@
+<p align="center"><img width="651" height="701" alt="ChatGPT Image Jun 11, 2026, 12_49_40 PM" src="https://github.com/user-attachments/assets/99da5453-5993-4993-8aac-51c0a4b6510c" /></p>
+
 # Cloud Router
 
 Send any file to the cloud straight from the right-click menu. Cloud Router adds
@@ -9,7 +11,7 @@ It finds your cloud folders for you (Dropbox, OneDrive, Google Drive, Box, Mega,
 Proton Drive, iCloud, plus mapped and network drives), and you can add any other
 folder by hand, including UNC shares and WebDAV.
 
-*Built and vibed with AI by Victor S. (DatJavaClass).*
+*Built and vibed with Victor S. (DatJavaClass) and his trusty AI assistant whos isn't afraid of Ghosts.
 
 ## Download
 
