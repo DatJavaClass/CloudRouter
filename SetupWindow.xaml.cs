@@ -10,10 +10,7 @@ using Microsoft.Win32;
 
 namespace CloudRouter;
 
-/// <summary>
-/// The setup window: shows auto-detected cloud / remote folders plus any the user
-/// adds manually, then writes destinations.json and registers the shell menu.
-/// </summary>
+/// <summary>Setup window: pick detected or manual folders, then install.</summary>
 public partial class SetupWindow : Window
 {
     /// <summary>A grid row. Plain mutable POCO; the DataGrid two-way binds into it.</summary>
@@ -50,7 +47,7 @@ public partial class SetupWindow : Window
         {
             var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            // Pre-fill from an existing install if there is one.
+            // Pre-fill from an existing install.
             string cfgPath = System.IO.Path.Combine(CloudConfig.InstallDir, "destinations.json");
             if (File.Exists(cfgPath))
             {
@@ -65,7 +62,7 @@ public partial class SetupWindow : Window
                 }
             }
 
-            // Then add anything detection finds that isn't already listed.
+            // Add anything detection finds not already listed.
             foreach (var c in Detection.Detect())
             {
                 if (string.IsNullOrWhiteSpace(c.path)) continue;
@@ -93,12 +90,11 @@ public partial class SetupWindow : Window
         }
     }
 
-    private static string RowKey(string path, string sub)
-        => (path.TrimEnd('\\', '/') + "|" + sub).ToLowerInvariant();
+    private static string RowKey(string path, string sub) => (path.TrimEnd('\\', '/') + "|" + sub).ToLowerInvariant();
 
     private void AddFolder_Click(object sender, RoutedEventArgs e)
     {
-        // OpenFolderDialog lets the user browse OR paste a path (incl. UNC \\server\share).
+        // Dialog also accepts a pasted UNC path.
         var dlg = new OpenFolderDialog { Title = "Pick a folder (or paste a UNC / network path)" };
         if (dlg.ShowDialog(this) == true)
         {

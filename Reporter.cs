@@ -6,13 +6,8 @@ using System.Text;
 
 namespace CloudRouter;
 
-/// <summary>
-/// Error logging and one-click problem reporting. Nothing is sent automatically:
-/// errors go to a local log, and "Report a problem" opens a PRE-FILLED GitHub
-/// issue in the browser, where the user reviews it and clicks submit. No API
-/// token, no server, no telemetry - a token shipped inside the app would just
-/// get extracted and abused, so the user's own GitHub login does the posting.
-/// </summary>
+/// <summary>Local error log plus one-click pre-filled GitHub issue.</summary>
+// No telemetry: a shipped token would get abused.
 public static class Reporter
 {
     public const string RepoUrl = "https://github.com/DatJavaClass/CloudRouter";
@@ -66,8 +61,7 @@ public static class Reporter
         catch { /* if the browser won't open, the log file still has everything */ }
     }
 
-    private static string AppVersion =>
-        Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?";
+    private static string AppVersion => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?";
 
     private static string TailLog(int maxChars)
     {

@@ -1,7 +1,4 @@
-<#
-  build.ps1 - Compiles Cloud Router and generates its icon.
-  Output lands in .\publish\
-#>
+# build.ps1: compile Cloud Router, emit icon to .\publish
 [CmdletBinding()]
 param()
 
@@ -10,7 +7,7 @@ $proj    = $PSScriptRoot
 $csproj  = Join-Path $proj 'CloudRouter.csproj'
 $pub     = Join-Path $proj 'publish'
 
-# Ensure a destinations.json exists (cloned repos ship only the example).
+# Ensure destinations.json exists (cloned repos ship the example).
 $cfg = Join-Path $proj 'destinations.json'
 if (-not (Test-Path -LiteralPath $cfg)) {
     Copy-Item (Join-Path $proj 'destinations.example.json') $cfg
@@ -29,7 +26,7 @@ $ico = Join-Path $pub 'CloudRouter.ico'
 Start-Process -FilePath $exe -ArgumentList '--makeicon', "`"$ico`"" -Wait -NoNewWindow
 if (-not (Test-Path -LiteralPath $ico)) { throw 'Icon generation failed.' }
 
-# Optional Authenticode signing. No-op unless signing.json exists (see sign.ps1).
+# Optional Authenticode signing; no-op without signing.json.
 & (Join-Path $proj 'sign.ps1') -Files @($exe, (Join-Path $pub 'CloudRouter.dll'))
 
 Write-Host "Done. Output: $pub" -ForegroundColor Green

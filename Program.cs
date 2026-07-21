@@ -12,12 +12,7 @@ using System.Windows.Forms;
 
 namespace CloudRouter;
 
-/// <summary>
-/// Cloud Router helper. Invoked by the Explorer "Cloud Router" context-menu
-/// submenu as:  CloudRouter.exe move &lt;destinationKey&gt; "&lt;itemPath&gt;"
-/// Moves (or copies) the selected file/folder into the chosen destination.
-/// A destination may define an enforced subfolder that items always land in.
-/// </summary>
+/// <summary>Explorer submenu helper: CloudRouter.exe move|copy &lt;key&gt; "&lt;path&gt;".</summary>
 internal static class Program
 {
     [STAThread]
@@ -27,48 +22,45 @@ internal static class Program
         {
             Application.EnableVisualStyles();
 
-            // No arguments (or --setup): open the WPF setup window.
-            if (args.Length == 0 || args[0].Equals("--setup", StringComparison.OrdinalIgnoreCase))
+            string verb = args.Length == 0 ? "--setup" : args[0].ToLowerInvariant();
+            switch (verb)
             {
-                var app = new System.Windows.Application();
-                app.Run(new SetupWindow());
-                return 0;
-            }
-
-            // Build-time helper: generate the standalone CloudRouter.ico.
-            if (args.Length >= 1 && args[0].Equals("--makeicon", StringComparison.OrdinalIgnoreCase))
-            {
-                string outPath = args.Length >= 2
-                    ? args[1]
-                    : Path.Combine(CloudConfig.AppDir, "CloudRouter.ico");
-                IconMaker.Write(outPath);
-                return 0;
-            }
-
-            // Setup helper: detect cloud / remote / shared folders, write them as JSON.
-            if (args.Length >= 1 && args[0].Equals("--detect", StringComparison.OrdinalIgnoreCase))
-            {
-                string outPath = args.Length >= 2
-                    ? args[1]
-                    : Path.Combine(CloudConfig.AppDir, "detected.json");
-                var found = Detection.Detect();
-                File.WriteAllText(outPath,
-                    JsonSerializer.Serialize(found, new JsonSerializerOptions { WriteIndented = true }));
-                return 0;
-            }
-
-            // Headless install / uninstall (the setup GUI calls Installer directly).
-            if (args[0].Equals("--install", StringComparison.OrdinalIgnoreCase))
-            {
-                string cfgPath = args.Length >= 2 ? args[1] : Path.Combine(CloudConfig.AppDir, "destinations.json");
-                string? dir = args.Length >= 3 ? args[2] : null;
-                Installer.Install(CloudConfig.Load(cfgPath), dir);
-                return 0;
-            }
-            if (args[0].Equals("--uninstall", StringComparison.OrdinalIgnoreCase))
-            {
-                Installer.Uninstall(removeFiles: !(args.Length >= 2 && args[1].Equals("keepfiles", StringComparison.OrdinalIgnoreCase)));
-                return 0;
+                case "--setup":
+                {
+                    var app = new System.Windows.Application();
+                    app.Run(new SetupWindow());
+                    return 0;
+                }
+                case "--makeicon": // build-time helper: generate CloudRouter.ico
+                {
+                    string outPath = args.Length >= 2
+                        ? args[1]
+                        : Path.Combine(CloudConfig.AppDir, "CloudRouter.ico");
+                    IconMaker.Write(outPath);
+                    return 0;
+                }
+                case "--detect": // find cloud/remote folders, write them as JSON
+                {
+                    string outPath = args.Length >= 2
+                        ? args[1]
+                        : Path.Combine(CloudConfig.AppDir, "detected.json");
+                    var found = Detection.Detect();
+                    File.WriteAllText(outPath,
+                        JsonSerializer.Serialize(found, new JsonSerializerOptions { WriteIndented = true }));
+                    return 0;
+                }
+                case "--install": // headless; the setup GUI calls Installer directly
+                {
+                    string cfgPath = args.Length >= 2 ? args[1] : Path.Combine(CloudConfig.AppDir, "destinations.json");
+                    string? dir = args.Length >= 3 ? args[2] : null;
+                    Installer.Install(CloudConfig.Load(cfgPath), dir);
+                    return 0;
+                }
+                case "--uninstall":
+                {
+                    Installer.Uninstall(removeFiles: !(args.Length >= 2 && args[1].Equals("keepfiles", StringComparison.OrdinalIgnoreCase)));
+                    return 0;
+                }
             }
 
             if (args.Length < 3)
@@ -78,10 +70,8 @@ internal static class Program
                 return 2;
             }
 
-            string action = args[0].Trim().ToLowerInvariant();
-            string key = args[1].Trim();
-            // The path is the final argument. Re-join any tail in case a path with
-            // spaces somehow arrived unquoted; then strip stray quotes.
+            string action = args[0].Trim().ToLowerInvariant(), key = args[1].Trim();
+            // Path is last; re-join an unquoted tail.
             string source = string.Join(' ', args.Skip(2)).Trim().Trim('"');
             bool copy = action == "copy";
 
@@ -96,9 +86,7 @@ internal static class Program
 
             string destDir = Environment.ExpandEnvironmentVariables(dest.path);
 
-            // Optional enforced subfolder: anything routed here always lands inside
-            // it, without exception (e.g. a WebDAV/NAS inbox). Appended unless the
-            // path already ends with it, so the rule can't be bypassed by config drift.
+            // Enforced subfolder always applies; config drift cannot bypass.
             if (!string.IsNullOrWhiteSpace(dest.subfolder))
             {
                 string sub = Environment.ExpandEnvironmentVariables(dest.subfolder).Trim('\\', '/');
@@ -177,9 +165,9 @@ internal static class Program
     {
         try
         {
-            Directory.Move(source, target); // instant when on the same volume
+            Directory.Move(source, target); // instant on the same volume
         }
-        catch (IOException) // thrown when crossing volumes (e.g. C: -> a WebDAV/NAS drive)
+        catch (IOException) // crossing volumes (C: to a WebDAV/NAS drive)
         {
             CopyDirectory(source, target);
             Directory.Delete(source, recursive: true);
@@ -195,7 +183,7 @@ internal static class Program
             CopyDirectory(sub, Path.Combine(destDir, Path.GetFileName(sub)));
     }
 
-    /// <summary>Brief Win10/11 toast via NotifyIcon. Click it to reveal the item.</summary>
+    /// <summary>Brief toast via NotifyIcon; click reveals the item.</summary>
     private static void Notify(string folder, string item, string target, bool copied)
     {
         try
@@ -229,7 +217,7 @@ internal static class Program
             }
             ni.Visible = false;
         }
-        catch { /* notifications are best-effort, never fail the move over them */ }
+        catch { /* never fail the move over a toast */ }
     }
 
     private static void ShowError(string message)
@@ -238,7 +226,7 @@ internal static class Program
     }
 }
 
-/// <summary>Draws the Cloud Router app icon (a cloud with an upload arrow) into a multi-size .ico.</summary>
+/// <summary>Draws the cloud-with-upload-arrow app icon into a multi-size .ico.</summary>
 internal static class IconMaker
 {
     public static void Write(string outPath)
@@ -252,22 +240,22 @@ internal static class IconMaker
         using var fs = new FileStream(outPath, FileMode.Create);
         using var bw = new BinaryWriter(fs);
 
-        bw.Write((ushort)0);              // reserved
-        bw.Write((ushort)1);              // type: icon
-        bw.Write((ushort)frames.Count);   // image count
+        bw.Write((ushort)0); // reserved
+        bw.Write((ushort)1); // type: icon
+        bw.Write((ushort)frames.Count); // image count
 
         int offset = 6 + 16 * frames.Count;
         foreach (var (size, png) in frames)
         {
-            byte dim = (byte)(size >= 256 ? 0 : size); // 0 means 256 in the ICO spec
-            bw.Write(dim);                 // width
-            bw.Write(dim);                 // height
-            bw.Write((byte)0);             // palette
-            bw.Write((byte)0);             // reserved
-            bw.Write((ushort)1);           // color planes
-            bw.Write((ushort)32);          // bits per pixel
-            bw.Write((uint)png.Length);    // size of data
-            bw.Write((uint)offset);        // offset of data
+            byte dim = (byte)(size >= 256 ? 0 : size); // 0 means 256 in ICO
+            bw.Write(dim); // width
+            bw.Write(dim); // height
+            bw.Write((byte)0); // palette
+            bw.Write((byte)0); // reserved
+            bw.Write((ushort)1); // color planes
+            bw.Write((ushort)32); // bits per pixel
+            bw.Write((uint)png.Length); // size of data
+            bw.Write((uint)offset); // offset of data
             offset += png.Length;
         }
         foreach (var (_, png) in frames)
@@ -299,12 +287,12 @@ internal static class IconMaker
 
         using var brush = new LinearGradientBrush(
             new RectangleF(0, S * 0.25f, S, S * 0.62f),
-            Color.FromArgb(255, 88, 165, 232),   // light cloud blue
-            Color.FromArgb(255, 27, 110, 194),   // deeper blue
+            Color.FromArgb(255, 88, 165, 232), // light cloud blue
+            Color.FromArgb(255, 27, 110, 194), // deeper blue
             LinearGradientMode.Vertical);
         g.FillPath(brush, path);
 
-        // Upload / route arrow, suggesting "send to the cloud".
+        // Upload arrow: send it to the cloud.
         using var white = new SolidBrush(Color.FromArgb(235, 255, 255, 255));
         using var arrow = new GraphicsPath { FillMode = FillMode.Winding };
         float cx = S * 0.50f;

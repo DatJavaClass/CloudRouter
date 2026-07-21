@@ -1,7 +1,4 @@
-<#
-  uninstall.ps1 - Removes the Cloud Router shell menu, unpins the Quick Access
-  destinations, and (optionally) deletes the installed files. Per-user only.
-#>
+# uninstall.ps1: remove shell menu, unpin, optionally delete files.
 [CmdletBinding()]
 param(
     [switch]$KeepQuickAccess,   # leave the Quick Access pins in place
@@ -11,7 +8,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $installDir = Join-Path $env:LOCALAPPDATA 'CloudRouter'
 
-# ------------------------------------------------------------- registry -----
+# registry
 function Remove-Tree([string]$sub) {
     try { [Microsoft.Win32.Registry]::CurrentUser.DeleteSubKeyTree($sub, $false); Write-Host "  removed HKCU\$sub" } catch {}
 }
@@ -20,7 +17,7 @@ Remove-Tree 'Software\Classes\*\shell\CloudRouter'
 Remove-Tree 'Software\Classes\Directory\shell\CloudRouter'
 Remove-Tree 'Software\Classes\CloudRouter.Sub'
 
-# --------------------------------------------------------- Quick Access -----
+# Quick Access
 if (-not $KeepQuickAccess) {
     Write-Host 'Unpinning destinations from Quick Access...' -ForegroundColor Cyan
     $targets = @()
@@ -49,14 +46,14 @@ if (-not $KeepQuickAccess) {
     } catch { Write-Warning "  Quick Access cleanup issue: $_" }
 }
 
-# ------------------------------------------------------------- files --------
+# files
 if (-not $KeepFiles -and (Test-Path -LiteralPath $installDir)) {
     Write-Host "Removing $installDir ..." -ForegroundColor Cyan
     try { Remove-Item -LiteralPath $installDir -Recurse -Force }
     catch { Write-Warning "  Could not delete $installDir (a CloudRouter.exe may still be running): $_" }
 }
 
-# ------------------------------------------------------- refresh shell ------
+# refresh shell
 $sig = '[DllImport("shell32.dll")] public static extern void SHChangeNotify(int eventId, int flags, IntPtr a, IntPtr b);'
 $sh  = Add-Type -MemberDefinition $sig -Name 'CrShellU' -Namespace 'Cr' -PassThru
 $sh::SHChangeNotify(0x08000000, 0, [IntPtr]::Zero, [IntPtr]::Zero)

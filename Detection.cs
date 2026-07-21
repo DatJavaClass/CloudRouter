@@ -6,28 +6,21 @@ using Microsoft.Win32;
 
 namespace CloudRouter;
 
-/// <summary>
-/// One detected (or manually added) destination candidate. Maps 1:1 onto a
-/// destinations.json entry once the user accepts it.
-/// </summary>
+/// <summary>One destination candidate; maps 1:1 onto a destinations.json entry.</summary>
 public sealed class Candidate
 {
-    public string provider { get; set; } = "";     // "OneDrive", "Dropbox", "Drive", "Manual", ...
-    public string name { get; set; } = "";          // suggested menu label
-    public string path { get; set; } = "";          // detected folder ("" if unknown)
-    public string subfolder { get; set; } = "";     // suggested enforced subfolder (usually "")
-    public string icon { get; set; } = "";          // "exe,index" or ".ico" path, best effort
-    public string source { get; set; } = "auto";    // auto | manual
-    public string confidence { get; set; } = "high";// high | low (low = please confirm/edit)
-    public string note { get; set; } = "";          // hint shown next to the row
+    public string provider { get; set; } = ""; // "OneDrive", "Dropbox", "Drive", "Manual", ...
+    public string name { get; set; } = ""; // suggested menu label
+    public string path { get; set; } = ""; // detected folder ("" if unknown)
+    public string subfolder { get; set; } = ""; // suggested enforced subfolder (usually "")
+    public string icon { get; set; } = ""; // "exe,index" or ".ico" path, best effort
+    public string source { get; set; } = "auto"; // auto | manual
+    public string confidence { get; set; } = "high"; // high | low (low = please confirm/edit)
+    public string note { get; set; } = ""; // hint shown next to the row
 }
 
-/// <summary>
-/// Best-effort discovery of cloud-sync and remote/shared folders on this PC.
-/// Every probe is isolated so one provider failing can't sink the rest. Anything
-/// not found here is covered by a manual "Add folder..." entry in the setup UI -
-/// detection is a convenience, the manual path is the guarantee.
-/// </summary>
+/// <summary>Best-effort cloud/remote folder discovery. Probes are isolated;
+/// detection is a convenience, the manual add is the guarantee.</summary>
 public static class Detection
 {
     public static List<Candidate> Detect()
@@ -40,16 +33,16 @@ public static class Detection
         Add(list, DetectProton);
         Add(list, DetectMega);
         Add(list, DetectICloud);
-        Add(list, DetectDrives);   // mapped network + WebDAV/NAS + extra local drives
+        Add(list, DetectDrives); // mapped network + WebDAV/NAS + extra local drives
         return list;
     }
 
     private static void Add(List<Candidate> list, Func<IEnumerable<Candidate>> probe)
     {
-        try { list.AddRange(probe()); } catch { /* a single provider miss must not break setup */ }
+        try { list.AddRange(probe()); } catch { /* one provider miss must not break setup */ }
     }
 
-    // ---- providers ---------------------------------------------------------
+    // Providers.
 
     private static IEnumerable<Candidate> DetectOneDrive()
     {
@@ -99,7 +92,7 @@ public static class Detection
         using (var dfs = Registry.CurrentUser.OpenSubKey(@"Software\Google\DriveFS"))
             mount = dfs?.GetValue("DefaultMountPoint") as string;
 
-        // Fall back to the drive whose volume label is "Google Drive".
+        // Fallback: the drive whose volume label is "Google Drive".
         if (string.IsNullOrWhiteSpace(mount))
         {
             foreach (var d in SafeDrives())
@@ -110,8 +103,7 @@ public static class Detection
         }
         if (string.IsNullOrWhiteSpace(mount)) yield break;
 
-        // Prefer the "My Drive" root if it exists under the mount.
-        string myDrive = Path.Combine(mount!, "My Drive");
+        string myDrive = Path.Combine(mount!, "My Drive"); // prefer the My Drive root
         string path = Directory.Exists(myDrive) ? myDrive : mount!;
         yield return new Candidate { provider = "Google Drive", name = "Google Drive", path = path, icon = icon };
     }
@@ -140,8 +132,7 @@ public static class Detection
 
     private static IEnumerable<Candidate> DetectMega()
     {
-        // MEGAsync keeps its sync folder in a binary SQLite cache we don't parse,
-        // so we only confirm the app is present and suggest the common location.
+        // MEGAsync hides its folder in a binary cache; confirm app, guess path.
         if (!Directory.Exists(Expand(@"%LOCALAPPDATA%\Mega Limited\MEGAsync"))) yield break;
 
         string icon = IconFrom(FirstExisting(
@@ -190,7 +181,7 @@ public static class Detection
         }
     }
 
-    // ---- helpers -----------------------------------------------------------
+    // Helpers.
 
     private static IEnumerable<DriveInfo> SafeDrives()
     {

@@ -1,19 +1,6 @@
-<#
-  sign.ps1 - Optional Authenticode signing for the built binaries.
-
-  Does NOTHING unless you provide a signing config, so it is safe to call from
-  every build. To enable: copy signing.example.json to signing.json (git-ignored),
-  fill it in, and rebuild. Supports three methods:
-
-    * trustedsigning - Azure Trusted Signing (~$10/mo, cloud, no token).
-                       Auth comes from your Azure login or the
-                       AZURE_TENANT_ID / AZURE_CLIENT_ID / AZURE_CLIENT_SECRET
-                       environment variables. Requires the NuGet package
-                       "Microsoft.Trusted.Signing.Client" (its bin\x64 folder
-                       holds Azure.CodeSigning.Dlib.dll - point "dlib" at it).
-    * pfx            - a .pfx certificate file + password.
-    * thumbprint     - a cert already in your store / on a hardware token (EV).
-#>
+# sign.ps1: optional Authenticode signing of the binaries.
+# No-op without signing.json (copy signing.example.json to enable).
+# Methods: trustedsigning, pfx, thumbprint.
 [CmdletBinding()]
 param(
     [string[]]$Files,
@@ -32,7 +19,7 @@ if (-not $Files -or $Files.Count -eq 0) { $Files = @(Join-Path $here 'publish\Cl
 $cfg = Get-Content -LiteralPath $ConfigPath -Raw | ConvertFrom-Json
 $ts  = if ($cfg.timestampUrl) { $cfg.timestampUrl } else { 'http://timestamp.acs.microsoft.com' }
 
-# Find the newest 64-bit signtool.exe from the installed Windows SDK.
+# Find the newest 64-bit signtool.exe from the SDK.
 $signtool = @('C:\Program Files (x86)\Windows Kits\10\bin', 'C:\Program Files\Windows Kits\10\bin') |
     Where-Object { Test-Path $_ } |
     ForEach-Object { Get-ChildItem $_ -Recurse -Filter signtool.exe -ErrorAction SilentlyContinue } |

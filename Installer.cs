@@ -7,37 +7,26 @@ using Microsoft.Win32;
 
 namespace CloudRouter;
 
-/// <summary>
-/// Deploys Cloud Router and registers / unregisters its shell context menu.
-/// Everything is per-user (HKCU + %LOCALAPPDATA%), so no admin rights and no
-/// PowerShell are required - the setup GUI calls straight into this.
-/// </summary>
+/// <summary>Deploys Cloud Router and registers its shell menu (per-user, no admin).</summary>
 public static class Installer
 {
     private const string SubMenuKey = "CloudRouter.Sub";
     private const string FileVerb   = @"Software\Classes\*\shell\CloudRouter";
     private const string FolderVerb = @"Software\Classes\Directory\shell\CloudRouter";
 
-    /// <summary>
-    /// Copy the helper into the install dir, write destinations.json, and register
-    /// the submenu. <paramref name="installDir"/> is overridable for testing.
-    /// </summary>
+    /// <summary>Deploy helper, write destinations.json, register the submenu.</summary>
     public static void Install(CloudConfig cfg, string? installDir = null)
     {
-        installDir ??= CloudConfig.InstallDir;
+        installDir ??= CloudConfig.InstallDir; // overridable for testing
         Directory.CreateDirectory(installDir);
 
-        // Keys become command-line arguments and registry sub-key names, so make
-        // them safe, unique slugs and store the same value we register.
+        // Keys become CLI args and registry key names.
         NormalizeKeys(cfg);
 
-        string exe = Path.Combine(installDir, "CloudRouter.exe");
-        string ico = Path.Combine(installDir, "CloudRouter.ico");
+        string exe = Path.Combine(installDir, "CloudRouter.exe"), ico = Path.Combine(installDir, "CloudRouter.ico");
 
-        // Deploy the helper. The single-file release is just the .exe (no loose deps);
-        // a dev build also has a few siblings. Copy ONLY the exe and those known
-        // siblings - never "every file beside me", since the single-file exe may be
-        // run straight from a Downloads folder full of unrelated files.
+        /* Copy only the exe and known siblings.
+           The single-file exe may sit among unrelated files. */
         string exeSource = Environment.ProcessPath ?? exe;
         string srcDir = Path.GetDirectoryName(exeSource) ?? CloudConfig.AppDir;
         if (!string.Equals(srcDir.TrimEnd('\\'), installDir.TrimEnd('\\'), StringComparison.OrdinalIgnoreCase))
@@ -50,11 +39,9 @@ public static class Installer
             }
         }
 
-        // The single-file build ships no loose .ico, so generate it if absent.
+        // Single-file build ships no .ico; generate it.
         if (!File.Exists(ico))
-        {
             try { IconMaker.Write(ico); } catch { /* icon is cosmetic */ }
-        }
 
         cfg.Save(Path.Combine(installDir, "destinations.json"));
 
@@ -64,9 +51,7 @@ public static class Installer
 
     public static void Uninstall(bool removeFiles = true)
     {
-        RemoveTree(FileVerb);
-        RemoveTree(FolderVerb);
-        RemoveTree($@"Software\Classes\{SubMenuKey}");
+        ClearVerbs();
         if (removeFiles)
         {
             try { if (Directory.Exists(CloudConfig.InstallDir)) Directory.Delete(CloudConfig.InstallDir, true); }
@@ -77,10 +62,7 @@ public static class Installer
 
     private static void WriteRegistry(CloudConfig cfg, string exe, string ico)
     {
-        // Start clean so renamed/removed destinations don't leave orphans.
-        RemoveTree(FileVerb);
-        RemoveTree(FolderVerb);
-        RemoveTree($@"Software\Classes\{SubMenuKey}");
+        ClearVerbs(); // start clean so removed destinations leave no orphans
 
         foreach (string parent in new[] { FileVerb, FolderVerb })
         {
@@ -122,6 +104,13 @@ public static class Installer
     }
 
     private static string Sanitize(string key) => new(key.Where(char.IsLetterOrDigit).ToArray());
+
+    private static void ClearVerbs() // drop both verbs and the submenu key
+    {
+        RemoveTree(FileVerb);
+        RemoveTree(FolderVerb);
+        RemoveTree($@"Software\Classes\{SubMenuKey}");
+    }
 
     private static void RemoveTree(string sub)
     {
