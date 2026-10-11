@@ -4,12 +4,12 @@
 
 Send any file to the cloud straight from the right-click menu. Cloud Router adds
 a single **Cloud Router** entry to Explorer's context menu that fans out into your
-cloud and network folders. Pick one, and the file (or folder) is moved there. No
+cloud folders. Pick one, and the file (or folder) is moved there. No
 dragging across windows, no hunting through a Save As dialog.
 
 It finds your cloud folders for you (Dropbox, OneDrive, Google Drive, Box, Mega,
-Proton Drive, iCloud, plus mapped and network drives), and you can add any other
-folder by hand, including UNC shares and WebDAV.
+Proton Drive, iCloud, plus extra local drives), and you can add any other local
+folder by hand.
 
 *Built and vibed with Victor S. (DatJavaClass) and his trusty AI assistant who isn't afraid of Ghosts.*
 
@@ -35,7 +35,7 @@ app isn't signed yet: choose **More info**, then **Run anyway**.)
 
 Download `CloudRouterSetup.exe` above and run it. The **setup window** opens and
 lists every cloud folder it found: tick the ones you want, hit **Add folder...**
-for a network or shared folder it missed, choose Move or Copy, and click
+for a local folder it missed, choose Move or Copy, and click
 **Install**. That registers the menu under `%LOCALAPPDATA%\CloudRouter` (per-user,
 no admin rights).
 
@@ -59,11 +59,10 @@ line, and `./install.ps1` builds and registers from `destinations.json` directly
 
 ## Adding folders by hand
 
-Detection covers the common apps, but it can't guess a random network share.
+Detection covers the common apps, but it can't guess every folder you use.
 Click **Add folder...**, then browse to it or paste a path directly:
 
 - A local folder: `D:\Archive`
-- A network share: `\\nas\backups`
 - A drive root plus a subfolder, so files land in `S:\Inbox` instead of `S:\`
 
 Give it a name, set a subfolder if you want one, and it joins the menu like any

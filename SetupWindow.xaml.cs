@@ -94,8 +94,7 @@ public partial class SetupWindow : Window
 
     private void AddFolder_Click(object sender, RoutedEventArgs e)
     {
-        // Dialog also accepts a pasted UNC path.
-        var dlg = new OpenFolderDialog { Title = "Pick a folder (or paste a UNC / network path)" };
+        var dlg = new OpenFolderDialog { Title = "Pick a folder" };
         if (dlg.ShowDialog(this) == true)
         {
             string p = dlg.FolderName;

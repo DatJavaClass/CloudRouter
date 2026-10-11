@@ -19,7 +19,7 @@ public sealed class Candidate
     public string note { get; set; } = ""; // hint shown next to the row
 }
 
-/// <summary>Best-effort cloud/remote folder discovery. Probes are isolated;
+/// <summary>Best-effort cloud folder discovery. Probes are isolated;
 /// detection is a convenience, the manual add is the guarantee.</summary>
 public static class Detection
 {
@@ -33,7 +33,7 @@ public static class Detection
         Add(list, DetectProton);
         Add(list, DetectMega);
         Add(list, DetectICloud);
-        Add(list, DetectDrives); // mapped network + WebDAV/NAS + extra local drives
+        Add(list, DetectDrives); // extra local drives
         return list;
     }
 
@@ -165,7 +165,7 @@ public static class Detection
         {
             string letter = d.Name.TrimEnd('\\');
             if (string.Equals(letter, sysRoot, StringComparison.OrdinalIgnoreCase)) continue; // skip the OS drive
-            if (d.DriveType is not (DriveType.Network or DriveType.Fixed or DriveType.Removable)) continue;
+            if (d.DriveType is not (DriveType.Fixed or DriveType.Removable)) continue; // network drives unsupported
 
             string label = SafeLabel(d);
             string name = string.IsNullOrWhiteSpace(label) ? $"Drive {letter}" : $"{label} ({letter})";
@@ -175,7 +175,7 @@ public static class Detection
                 name = name,
                 path = d.RootDirectory.FullName,
                 source = "auto",
-                confidence = d.DriveType == DriveType.Network ? "high" : "low",
+                confidence = "low",
                 note = $"{d.DriveType} drive - consider a subfolder so files don't land at the root"
             };
         }

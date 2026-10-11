@@ -13,7 +13,7 @@
     <AssemblyTitle>Cloud Router</AssemblyTitle>
     <Authors>Victor S. (DatJavaClass)</Authors>
     <Description>Route files into cloud and remote folders from the Windows right-click menu.</Description>
-    <Version>1.0.0</Version>
+    <Version>1.0.2</Version>
     <!-- Reproducible build, no machine/user paths baked into the binary. -->
     <Deterministic>true</Deterministic>
     <!-- The shell never sees a console window: WinExe + no console output. -->

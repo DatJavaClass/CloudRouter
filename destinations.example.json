@@ -17,10 +17,10 @@
       "icon": ""
     },
     {
-      "_comment": "Optional 'subfolder' forces everything routed here into that subfolder, no exceptions - handy for a WebDAV/NAS inbox you don't want cluttered.",
+      "_comment": "Optional 'subfolder' forces everything routed here into that subfolder, no exceptions - handy for a drive root you don't want cluttered.",
       "key": "backup",
-      "name": "Backup (WebDAV)",
-      "path": "W:\\",
+      "name": "Backup",
+      "path": "D:\\",
       "subfolder": "Inbox",
       "icon": ""
     }

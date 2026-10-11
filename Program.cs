@@ -167,7 +167,7 @@ internal static class Program
         {
             Directory.Move(source, target); // instant on the same volume
         }
-        catch (IOException) // crossing volumes (C: to a WebDAV/NAS drive)
+        catch (IOException) // crossing volumes (C: to D:)
         {
             CopyDirectory(source, target);
             Directory.Delete(source, recursive: true);

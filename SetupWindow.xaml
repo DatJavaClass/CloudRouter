@@ -15,7 +15,7 @@
 
         <TextBlock Grid.Row="0" Text="Cloud Router" FontSize="24" FontWeight="SemiBold"/>
         <TextBlock Grid.Row="1" Margin="0,4,0,14" Foreground="#555" TextWrapping="Wrap"
-                   Text="Tick the folders you want in the right-click menu. Add network or shared folders with &quot;Add folder...&quot;. For a drive root you don't want cluttered, set a Subfolder (e.g. Inbox) and everything routed there lands inside it."/>
+                   Text="Tick the folders you want in the right-click menu. Add any other local folder with &quot;Add folder...&quot;. For a drive root you don't want cluttered, set a Subfolder (e.g. Inbox) and everything routed there lands inside it."/>
 
         <DataGrid Grid.Row="2" x:Name="DestGrid" AutoGenerateColumns="False" CanUserAddRows="False"
                   HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeaderWidth="0"
